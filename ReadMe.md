@@ -1,6 +1,8 @@
 # A.S.I.F.
 almost super inteligent folder
 
+![](.\imgs\20220620.png)
+
 <!--TOC-->
 - [A.S.I.F.](#asif)
     - [requirments](#requirments)

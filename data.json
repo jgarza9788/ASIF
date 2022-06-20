@@ -21,6 +21,6 @@
             "C:\\Users\\JGarza\\GitHub"
         ],
         "regex": "^((?!venv)).*main.py",
-        "used_count": 24
+        "used_count": 25
     }
 ]
