@@ -5,7 +5,7 @@
             "D:\\Torrents\\Movies"
         ],
         "regex": "(\\.avi$|\\.flv$|\\.wmv$|\\.mov$|\\.mp4|\\.mkv$)",
-        "used_count": 34
+        "used_count": 84
     },
     {
         "name": "shows",
@@ -13,14 +13,14 @@
             "D:\\Torrents\\Shows"
         ],
         "regex": "(\\.avi$|\\.flv$|\\.wmv$|\\.mov$|\\.mp4|\\.mkv$)",
-        "used_count": 27
+        "used_count": 83
     },
     {
         "name": "pythons",
         "dirs": [
             "C:\\Users\\JGarza\\GitHub"
         ],
-        "regex": "^((?!venv)).*main.py",
-        "used_count": 29
+        "regex": "^(?!(venv)).*main.py",
+        "used_count": 59
     }
 ]

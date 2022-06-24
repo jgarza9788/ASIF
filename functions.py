@@ -1,6 +1,7 @@
 
 import os,re,json
 from datetime import datetime
+# import multiprocessing as mp
 
 DIR = os.path.dirname(os.path.realpath(__file__))
 
@@ -61,21 +62,69 @@ def sortby(this_list,reverse=False,column='file'):
     this_list.sort(key=_sortby,reverse=reverse)
     return this_list
 
+# search_results = []
 
-def search(item,always_exclude=[],callback=None):
+# def append_to_search_results(i):
+#     search_results.append(i)
+
+# def search_dir(args):
+#     print(args)
+#     result = []
+#     for index,(root,dirs,files) in enumerate(os.walk(args[0])):
+#         # wlength = len(list(os.walk(d)))
+#         # for index,(root,dirs,files) in enumerate(os.walk(d)):
+
+#         #     if callback != None:
+#         #         try:
+#         #             callback(index/wlength)
+#         #         except:
+#         #             pass
+
+#         for file in files:
+
+#             if file.startswith('.'):
+#                 continue
+
+#             cont = False
+#             for i in agrs[2]:
+#                 if i.lower() in file.lower():
+#                     cont = True
+#                     continue
+#             if cont == True:
+#                 continue
+
+#             if re.search(pattern=args[1]['regex'],string=file):
+#                 f = os.path.join(root,file)
+#                 result.append(
+#                     {
+#                         'file': file,
+#                         'parent_dir':root,
+#                         'fullpath':f,
+#                         'created': convertUnixDateTime(os.stat(f).st_ctime,True)
+#                     }
+#                     )
+#     return result
+
+
+def search(item,callback=None):
     # https://www.tutorialspoint.com/python/os_stat.htm
 
     if check_search_00(item) == False:
         return 0
 
+    # pool = mp.Pool()
+    # search_results = []
+    # for d in item['dirs']:
+    #     pool.apply_async(search_dir,(d,item,always_exclude),callback=append_to_search_results)
+    # pool.close()
+    # pool.join()
+    # return search_results
+
     result = []
     for d in item['dirs']:
-        # for index,(root,dirs,files) in enumerate(os.walk(d)):
+
         wlength = len(list(os.walk(d)))
         for index,(root,dirs,files) in enumerate(os.walk(d)):
-            # print(index,root,dirs,files)
-
-            
 
             if callback != None:
                 try:
@@ -88,13 +137,13 @@ def search(item,always_exclude=[],callback=None):
                 if file.startswith('.'):
                     continue
 
-                cont = False
-                for i in always_exclude:
-                    if i.lower() in file.lower():
-                        cont = True
-                        continue
-                if cont == True:
-                    continue
+                # cont = False
+                # for i in always_exclude:
+                #     if i.lower() in file.lower():
+                #         cont = True
+                #         continue
+                # if cont == True:
+                #     continue
 
                 if re.search(pattern=item['regex'],string=file):
                     f = os.path.join(root,file)
@@ -109,27 +158,36 @@ def search(item,always_exclude=[],callback=None):
     return result
 
 
+def get_icon(file_name):
+    from icon_dict import icon_dict
+    try:
+        return icon_dict[file_name.split('.')[-1]]
+    except:
+        return '\uf0c8'
+
+
 if __name__ == '__main__':
     # import pprint as pp
-    # i = {
-    #     'name': 'movies',
-    #     'dirs':['D:\Torrents\Movies','D:\Torrents\Shows'],
-    #     'regex':'(\.avi$|\.flv$|\.wmv$|\.mov$|\.mp4|\.mkv$)',
-    #     'used_count':0
-    #     }
     i = {
         'name': 'movies',
-        'dirs':['C:\\Users\\JGarza\\GitHub'],
-        # 'regex':'^((?!venv).).*main\.py$',
-        'regex':'^((?!venv).)$',
+        'dirs':['D:\Torrents\Movies','D:\Torrents\Shows'],
+        'regex':'(\.avi$|\.flv$|\.wmv$|\.mov$|\.mp4|\.mkv$|\.)',
         'used_count':0
         }
+    # i = {
+    #     'name': 'movies',
+    #     'dirs':['C:\\Users\\JGarza\\GitHub'],
+    #     # 'regex':'^((?!venv).).*main\.py$',
+    #     'regex':'main.py$',
+    #     'used_count':0
+    #     }
     # # main()
     results = search(i)
     results = sortby(results)
     # print(*results,sep='\n\n')
     for r in results:
-        print(r['fullpath'])
+        # print(r['fullpath'])
+        print(get_icon(r['file']))
 
     # i = [
     #         {

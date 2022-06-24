@@ -82,34 +82,35 @@
 
 ##############################################################
 
-# import dearpygui.dearpygui as dpg
-# import dearpygui.demo as demo
+import dearpygui.dearpygui as dpg
+import dearpygui.demo as demo
 
-# dpg.create_context()
-# dpg.create_viewport(title='Custom Title', width=600, height=600)
+dpg.create_context()
+dpg.create_viewport(title='Custom Title', width=600, height=600)
 
-# demo.show_demo()
+demo.show_demo()
 
-# dpg.setup_dearpygui()
-# dpg.show_viewport()
-# dpg.start_dearpygui()
-# dpg.destroy_context()
+dpg.setup_dearpygui()
+dpg.show_viewport()
+dpg.start_dearpygui()
+dpg.destroy_context()
 
 
 ##############################################################
 
-import re
+# import re
 
-# string = r'D:\Torrents\Movies\V.For.Vendetta.2005.720p.Bluray.x264.DTS.DXVA-FLAWL3SS\V.For.Vendetta.2005.720p.Bluray.x264.DTS.DXVA-FLAWL3SS.mkv'
-strings = [
-    'abbbbbc',
-    'ausdbfayfg',
-    'fasgfdafgadfg'
-    ]
+# # string = r'D:\Torrents\Movies\V.For.Vendetta.2005.720p.Bluray.x264.DTS.DXVA-FLAWL3SS\V.For.Vendetta.2005.720p.Bluray.x264.DTS.DXVA-FLAWL3SS.mkv'
+# strings = [
+#     'abbbbbc',
+#     'ausdbfayfg',
+#     'fasgfdafgadfg'
+#     ]
 
-for s in strings:
-    # if re.search('^.*(?!b).*$',s):
-    if re.match('^((?!b).)*$',s):
-        print(s,'Y')
-    else:
-        print(s,'N')
+# for s in strings:
+#     # if re.search('^.*(?!b).*$',s):
+#     # if re.match('^((?!b).)*$',s):
+#     if re.match('^.*(?!b).*$',s):
+#         print(s,'Y')
+#     else:
+#         print(s,'N')
