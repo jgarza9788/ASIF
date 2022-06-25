@@ -4,7 +4,8 @@ import functions as funct
 import dearpygui.dearpygui as dpg
 import theme
 
-import create_item
+import shutil
+# import create_item
 
 # https://dearpygui.readthedocs.io/en/latest/index.html
 
@@ -23,51 +24,49 @@ class MainWindow():
         self.results = []
         self.results = funct.search(self.data[0])
 
-        print(*self.data)
+        # print(*self.data)
 
         self.mythemes = {}
 
+        
+        # uc_layout = os.path.join(self.DIR,'user_custom_layout.ini')
+        c_layout = os.path.join(self.DIR,'layout.ini')
+        # if not os.path.exists(uc_layout):
+        #     shutil.copy(c_layout, uc_layout)
+
         dpg.create_context()
+        self.mythemes = theme.get_themes()
 
-        dpg.create_viewport(
-            title='ASIF', 
-            width=600, 
-            height=800,
-            x_pos = 400,
-            y_pos = 25,
-            )
+        dpg.configure_app(
+            docking=True, 
+            docking_space=True,
+            load_init_file=c_layout
+            ) 
+        
+        dpg.create_viewport(title='ASIF', width=600, height=800,x_pos = 400,y_pos = 25,)
 
-        # create_item.exe()
-
-        with dpg.font_registry():
-            # first argument ids the path to the .ttf or .otf file
-            df = os.path.join(self.DIR,'fonts','Hack Regular Nerd Font Complete Mono Windows Compatible.ttf')
-            default_font = dpg.add_font(df, 14)
+        with dpg.viewport_menu_bar():
             
-        #     with dpg.font(df, 14) as font1:
-        #         dpg.add_font_range(0xf600, 0xf1ff)
-        #         dpg.add_font_range(0x3100, 0x3ff0)
-        #         default_font = font1
-                
-        #     # with dpg.add_font(df, 14) as font:
-        #     #     default_font = font
-        dpg.show_font_manager()
+            with dpg.menu(label="Settings"):
+                dpg.add_menu_item(label="Save Layout", 
+                    callback=lambda: dpg.save_init_file(c_layout), 
+                    )
+
+        dpg.setup_dearpygui()
 
 
-        # self.primary_window = dpg.window(tag="Primary Window",no_scrollbar=True)
-        # with self.primary_window:
-        with dpg.window(tag="#primary_window",no_scrollbar=True):
-            dpg.bind_font(default_font)
-            
-            # dpg.add_button(label="Open Dialog", callback=lambda: dpg.configure_item("modal_id", show=True))
+        self.filter_window = dpg.generate_uuid()
+        self.item_window = dpg.generate_uuid()
+        self.items_tags = []
+        self.result_window = dpg.generate_uuid()
+        self.result_tags = []
 
-            self.mythemes = theme.get_themes()
-
-            # dpg.add_text("😀😊☺🙄🥱🤧🧐🤓👽👾👻😼😽😽😽😽😽🦓🦓🦓")
-
-            # menu = dpg.add_menu_bar()
-            # dpg.add_menu_item(label="add", parent=menu,callback=self.hello)
-
+        with dpg.window(tag=self.filter_window,
+            # label='filter_window',
+            no_close=True,
+            no_title_bar=True,
+            no_collapse=True
+            ):
             with dpg.group(horizontal=True) as row:
                 reset_button = dpg.add_button(
                     label="X", 
@@ -75,6 +74,7 @@ class MainWindow():
                     callback= self.clear, 
                     tag=''
                     )
+                # dpg.bind_item_theme(fi,self.mythemes['filter_theme'])
 
                 fi = dpg.add_input_text(
                     hint='filter (regex)',
@@ -82,11 +82,10 @@ class MainWindow():
                     width=-1,
                     # pos=(10,7),
                     label="",  
-                    callback=self.refresh_results
+                    callback=self.refresh_results_window
                     )
-                
-                # dpg.bind_item_theme(fi,mythemes['filter_theme'])
-
+            
+            dpg.bind_item_theme(fi,self.mythemes['filter_theme'])
             pb = dpg.add_progress_bar(
                 default_value=1.0,
                 width=-1,
@@ -96,42 +95,71 @@ class MainWindow():
             )
             dpg.bind_item_theme(pb,self.mythemes['progress_bar_theme'])
 
-            self.refresh_sidepanel()
-            self.refresh_results()
+        
+        with dpg.window(tag=self.item_window,
+            # label='search_items',
+            no_close=True,
+            no_title_bar=True,
+            no_collapse=True
+            ):
+            self.refresh_item_window()
 
-        dpg.setup_dearpygui()
+
+        with dpg.window(tag=self.result_window,
+            # label='results',
+            no_close=True,
+            no_title_bar=True,
+            no_collapse=True
+            ):
+            self.refresh_results_window()
+
+
+
         dpg.show_viewport()
-        dpg.set_primary_window("#primary_window", True)
-        dpg.start_dearpygui()
+
+        # dpg.set_primary_window("#primary_window", True)
+        # dpg.start_dearpygui()
+
+        while dpg.is_dearpygui_running():
+            dpg.render_dearpygui_frame()
         dpg.destroy_context()
 
     def clear(self):
         dpg.set_value('##filter','') 
-        self.refresh_results()
+        self.refresh_results_window()
 
-    def refresh_sidepanel(self):
-        tag = '##sidepanel'
-        try:
-            dpg.delete_item(tag)
-        except:
-            pass
+    def delete_ui_objects(self,tag_list):
+        for tag in tag_list:
+            try:
+                dpg.delete_item(tag)
+            except:
+                pass
 
-        cw = dpg.add_child_window(width=150,tag=tag)
+    def refresh_item_window(self):
+        self.delete_ui_objects(self.items_tags)
+
+        # with self.item_window:
+
         for index,i in enumerate(self.data):
             # print(','.join(i['dirs']))
             # print(i['regex'])
 
-            with dpg.group(horizontal=True,parent=cw) as row:
+            tag = i['name'] + '_' + str(index)
+            self.items_tags.append(tag)
+
+            with dpg.group(horizontal=True,parent=self.item_window):
                 b = dpg.add_button(
                     label=i['name'] , 
                     width=135,
                     callback=self.perform_search, 
                     tag=i['name'] + '_' + str(index),
-                    parent=row
                     )
 
                 with dpg.tooltip(b):
                     dpg.add_text('name: {0}\ndirs: {1}\nregex: {2}'.format(i['name'],','.join(i['dirs']),i['regex']))
+                    # dpg.add_text('name: {0}'.format(i['name']))
+                    # dpg.add_text('dirs: {0}'.format(','.join(i['dirs'])))
+                    # dpg.add_text('regex: {0}'.format(i['regex']))
                 
                 # dpg.add_button(
                 #     label="?", 
@@ -141,22 +169,17 @@ class MainWindow():
                 #     parent=row
                 # )
 
-    def refresh_results(self):
-        tag = '##result'
+    def refresh_results_window(self):
+        self.delete_ui_objects(self.result_tags)
+
+        filter_pattern = '.*'
         try:
-            dpg.delete_item(tag)
+            filter_pattern = dpg.get_value('##filter').upper()
+            if filter_pattern == None:
+                filter_pattern = '.*'
         except:
             pass
 
-        filter_pattern = dpg.get_value('##filter').upper()
-        if filter_pattern == None:
-            filter_pattern = '.*'
-
-        mw = dpg.add_child_window(
-            pos=(160,40),
-            tag=tag,
-            parent="#primary_window"
-            )           
         for index,i in enumerate(self.results):
 
             self.update_pb(index/len(self.results))
@@ -166,6 +189,8 @@ class MainWindow():
 
             if re.search(pattern=filter_pattern,string=i['fullpath'].upper()):
 
+                tag = i['file'] + str(index)
+                self.result_tags.append(tag)
 
                 # icon = funct.get_icon(i['file'])
                 # icon = '🍿'
@@ -178,8 +203,8 @@ class MainWindow():
                     user_data=i['fullpath'],
                     width=400,
                     callback=self.open_item, 
-                    tag='',
-                    parent=mw
+                    tag=tag,
+                    parent=self.result_window
                     )  
                 with dpg.tooltip(b):
                     dpg.add_text('file: {0}\ndir: {1}\ncreated: {2}'.format(i['file'],i['parent_dir'],str(i['created'])))
@@ -198,7 +223,7 @@ class MainWindow():
         funct.save(data=self.data,file=self.dfile)
         self.results = funct.search(self.data[index],callback=self.update_pb)
         self.results = funct.sortby(self.results,reverse=False,column='file')
-        self.refresh_results()
+        self.refresh_results_window()
 
     def open_item(self,sender,app_data, user_data):
         print(sender)

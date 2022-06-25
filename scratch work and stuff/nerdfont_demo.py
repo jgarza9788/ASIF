@@ -1,6 +1,12 @@
 
 import os
 import dearpygui.dearpygui as dpg
+import nerdfonts as nf
+
+
+for k in nf.icons.keys():
+    print(k,nf.icons[k])
+
 
 DIR = os.path.dirname(os.path.realpath(__file__))
 
@@ -16,7 +22,7 @@ dpg.create_viewport(
 
 with dpg.font_registry():
     # first argument ids the path to the .ttf or .otf file
-    df = os.path.join(DIR,'fonts','Hack Regular Nerd Font Complete Mono Windows Compatible.ttf')
+    df = os.path.join(r"C:\Users\JGarza\GitHub\ASIF\fonts",'Hack Regular Nerd Font Complete Mono Windows Compatible.ttf')
     
     with dpg.font(df, 14) as font1:
         dpg.add_font_range(0xf600, 0xf1ff)
@@ -31,6 +37,7 @@ dpg.show_font_manager()
 
 with dpg.window(tag="#primary_window",no_scrollbar=True):
     dpg.bind_font(default_font)
+    dpg.add_text(nf.icons['fa_thumbs_up'])
     dpg.add_text('hello world \uf883 0xf883 ')
     dpg.add_text('hello world \uf883 \xef\x99\x82 \ \ufd11 U+f642 0xf883')
     dpg.add_text(r"")

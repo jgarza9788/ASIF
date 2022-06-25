@@ -93,7 +93,7 @@ def get_themes():
 
     with dpg.theme() as filter_theme:
         with dpg.theme_component(dpg.mvAll):
-            dpg.add_theme_color(dpg.mvThemeCol_Text, [255, 0, 0])
+            # dpg.add_theme_color(dpg.mvThemeCol_Text, [255, 0, 0])
             dpg.add_theme_color(dpg.mvThemeCol_FrameBg, (150, 100, 100,255), category=dpg.mvThemeCat_Core)
             dpg.add_theme_style(dpg.mvStyleVar_FrameRounding, 5, category=dpg.mvThemeCat_Core)
     result['filter_theme'] = filter_theme
