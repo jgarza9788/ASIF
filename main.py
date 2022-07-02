@@ -1,11 +1,15 @@
-from ast import Lambda
+
+
 import os,re
 import functions as funct
 import dearpygui.dearpygui as dpg
+from menu import menu
+# from new_search_window import new_search_window
+from filter_window import filter_window
+from result_window import result_window,update_text
+from item_window import item_window
 import theme
 
-import shutil
-# import create_item
 
 # https://dearpygui.readthedocs.io/en/latest/index.html
 
@@ -23,106 +27,62 @@ class MainWindow():
         
         self.results = []
         self.results = funct.search(self.data[0])
+        self.filtered_results_count = len(self.results)
 
-        # print(*self.data)
-
-        self.mythemes = {}
-
-        
-        # uc_layout = os.path.join(self.DIR,'user_custom_layout.ini')
-        c_layout = os.path.join(self.DIR,'layout.ini')
-        # if not os.path.exists(uc_layout):
-        #     shutil.copy(c_layout, uc_layout)
+        self.layout = os.path.join(self.DIR,'layout.ini')
 
         dpg.create_context()
+
+        # with dpg.font_registry():
+        #     df = os.path.join(self.DIR,"fonts",'Hack Regular Nerd Font Complete Mono Windows Compatible.ttf')
+        #     # default_font = dpg.font(df, 14)
+        #     # with dpg.font(df, 14) as font1:
+        #     dfont = dpg.add_font(df, 14)
+        #     dpg.bind_font(dfont)
+        # dpg.show_font_manager()
+    
+
+        self.mythemes = {}
         self.mythemes = theme.get_themes()
 
         dpg.configure_app(
             docking=True, 
             docking_space=True,
-            load_init_file=c_layout
+            load_init_file=self.layout 
             ) 
         
         dpg.create_viewport(title='ASIF', width=600, height=800,x_pos = 400,y_pos = 25,)
 
-        with dpg.viewport_menu_bar():
-            
-            with dpg.menu(label="Settings"):
-                dpg.add_menu_item(label="Save Layout", 
-                    callback=lambda: dpg.save_init_file(c_layout), 
-                    )
-
         dpg.setup_dearpygui()
-
 
         self.filter_window = dpg.generate_uuid()
         self.item_window = dpg.generate_uuid()
         self.items_tags = []
         self.result_window = dpg.generate_uuid()
         self.result_tags = []
+        # self.new_search_window = dpg.generate_uuid()
 
-        with dpg.window(tag=self.filter_window,
-            # label='filter_window',
-            no_close=True,
-            no_title_bar=True,
-            no_collapse=True
-            ):
-            with dpg.group(horizontal=True) as row:
-                reset_button = dpg.add_button(
-                    label="X", 
-                    width=20,
-                    callback= self.clear, 
-                    tag=''
-                    )
-                # dpg.bind_item_theme(fi,self.mythemes['filter_theme'])
+        menu(self)
+        # new_search_window(self)
+        filter_window(self)
 
-                fi = dpg.add_input_text(
-                    hint='filter (regex)',
-                    tag='##filter',
-                    width=-1,
-                    # pos=(10,7),
-                    label="",  
-                    callback=self.refresh_results_window
-                    )
-            
-            dpg.bind_item_theme(fi,self.mythemes['filter_theme'])
-            pb = dpg.add_progress_bar(
-                default_value=1.0,
-                width=-1,
-                # height=-1,
-                height=5,
-                tag='##progress_bar'
-            )
-            dpg.bind_item_theme(pb,self.mythemes['progress_bar_theme'])
-
+        result_window(self)
+        # self.refresh_results_window()
         
-        with dpg.window(tag=self.item_window,
-            # label='search_items',
-            no_close=True,
-            no_title_bar=True,
-            no_collapse=True
-            ):
-            self.refresh_item_window()
-
-
-        with dpg.window(tag=self.result_window,
-            # label='results',
-            no_close=True,
-            no_title_bar=True,
-            no_collapse=True
-            ):
-            self.refresh_results_window()
-
-
+        item_window(self)
+        # self.refresh_item_window()
 
         dpg.show_viewport()
-
-        # dpg.set_primary_window("#primary_window", True)
-        # dpg.start_dearpygui()
 
         while dpg.is_dearpygui_running():
             dpg.render_dearpygui_frame()
         dpg.destroy_context()
+
+    def show_window(self,tag):
+        try:
+            dpg.configure_item(tag,show=True)
+        except:
+            pass
 
     def clear(self):
         dpg.set_value('##filter','') 
@@ -147,9 +107,10 @@ class MainWindow():
             tag = i['name'] + '_' + str(index)
             self.items_tags.append(tag)
 
+            # try:
             with dpg.group(horizontal=True,parent=self.item_window):
                 b = dpg.add_button(
-                    label=i['name'] , 
+                    label=i['name'].ljust(50,' ') , 
                     width=135,
                     callback=self.perform_search, 
                     tag=i['name'] + '_' + str(index),
@@ -168,6 +129,12 @@ class MainWindow():
                 #     # tag=''
                 #     parent=row
                 # )
+            # except Exception as e:
+            #     print(str(e))
+
+    def add_new_search(self):
+        # name = dpg.get_value('##ns_name').upper()
+        pass
 
     def refresh_results_window(self):
         self.delete_ui_objects(self.result_tags)
@@ -180,6 +147,8 @@ class MainWindow():
         except:
             pass
 
+        self.filtered_results_count = 0
+
         for index,i in enumerate(self.results):
 
             self.update_pb(index/len(self.results))
@@ -188,6 +157,9 @@ class MainWindow():
             # print('i[\'fullpath\']',i['fullpath'])
 
             if re.search(pattern=filter_pattern,string=i['fullpath'].upper()):
+
+                self.filtered_results_count += 1
+                update_text(self)
 
                 tag = i['file'] + str(index)
                 self.result_tags.append(tag)
@@ -215,6 +187,7 @@ class MainWindow():
         dpg.set_value('##progress_bar',value)
 
     def perform_search(self,sender):
+        self.update_pb(0.1)
         s = sender.split('_')
         name,index = s[0], int(s[1])
         print(name,index)
@@ -236,6 +209,10 @@ class MainWindow():
 
 if __name__ == "__main__":
     MW = MainWindow()
+
+    # import time
+    # time.sleep(0.1)
+    # MW.show_window(MW.new_search_window)
 
     # import dearpygui.dearpygui as dpg
 

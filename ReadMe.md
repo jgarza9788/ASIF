@@ -7,9 +7,9 @@ almost super inteligent folder
 <!--TOC-->
 
 - [A.S.I.F.](#asif)
-  - [requirments](#requirments)
-  - [run](#run)
-  - [why?](#why)
+    - [requirments](#requirments)
+    - [run](#run)
+    - [why?](#why)
     - [todos](#todos)
 
 <!--TOC-->

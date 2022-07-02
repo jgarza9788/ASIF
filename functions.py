@@ -1,10 +1,8 @@
 
 import os,re,json
 from datetime import datetime
-# import multiprocessing as mp
 
 DIR = os.path.dirname(os.path.realpath(__file__))
-
 
 def string_reduce(string,limit=50,start_percent=0.5):
 
@@ -16,7 +14,6 @@ def string_reduce(string,limit=50,start_percent=0.5):
         return string[:limit-spn] + '...' + string[-(spn-3):]
     else:
         return string
-
 
 def get_data(file):
     try:
@@ -62,63 +59,11 @@ def sortby(this_list,reverse=False,column='file'):
     this_list.sort(key=_sortby,reverse=reverse)
     return this_list
 
-# search_results = []
-
-# def append_to_search_results(i):
-#     search_results.append(i)
-
-# def search_dir(args):
-#     print(args)
-#     result = []
-#     for index,(root,dirs,files) in enumerate(os.walk(args[0])):
-#         # wlength = len(list(os.walk(d)))
-#         # for index,(root,dirs,files) in enumerate(os.walk(d)):
-
-#         #     if callback != None:
-#         #         try:
-#         #             callback(index/wlength)
-#         #         except:
-#         #             pass
-
-#         for file in files:
-
-#             if file.startswith('.'):
-#                 continue
-
-#             cont = False
-#             for i in agrs[2]:
-#                 if i.lower() in file.lower():
-#                     cont = True
-#                     continue
-#             if cont == True:
-#                 continue
-
-#             if re.search(pattern=args[1]['regex'],string=file):
-#                 f = os.path.join(root,file)
-#                 result.append(
-#                     {
-#                         'file': file,
-#                         'parent_dir':root,
-#                         'fullpath':f,
-#                         'created': convertUnixDateTime(os.stat(f).st_ctime,True)
-#                     }
-#                     )
-#     return result
-
-
 def search(item,callback=None):
     # https://www.tutorialspoint.com/python/os_stat.htm
 
     if check_search_00(item) == False:
         return 0
-
-    # pool = mp.Pool()
-    # search_results = []
-    # for d in item['dirs']:
-    #     pool.apply_async(search_dir,(d,item,always_exclude),callback=append_to_search_results)
-    # pool.close()
-    # pool.join()
-    # return search_results
 
     result = []
     for d in item['dirs']:
@@ -137,14 +82,6 @@ def search(item,callback=None):
                 if file.startswith('.'):
                     continue
 
-                # cont = False
-                # for i in always_exclude:
-                #     if i.lower() in file.lower():
-                #         cont = True
-                #         continue
-                # if cont == True:
-                #     continue
-
                 if re.search(pattern=item['regex'],string=file):
                     f = os.path.join(root,file)
                     result.append(
@@ -158,12 +95,12 @@ def search(item,callback=None):
     return result
 
 
-def get_icon(file_name):
-    from icon_dict import icon_dict
-    try:
-        return icon_dict[file_name.split('.')[-1]]
-    except:
-        return '\uf0c8'
+# def get_icon(file_name):
+#     from icon_dict import icon_dict
+#     try:
+#         return icon_dict[file_name.split('.')[-1]]
+#     except:
+#         return '\uf0c8'
 
 
 if __name__ == '__main__':
